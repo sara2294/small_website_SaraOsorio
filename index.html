@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de Repositorios GitHub</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+    <h1 class="mb-4 text-center">Buscador de Repositorios de GitHub</h1>
+
+    <!-- Formulario de búsqueda -->
+    <div class="card p-4 shadow-sm mb-4">
+        <div class="input-group">
+            <input type="text" id="username" class="form-control" placeholder="Introduce el nombre de usuario (ej. octocat)">
+            <button id="searchBtn" class="btn btn-primary">Buscar Repositorios</button>
+        </div>
+    </div>
+
+    <!-- Tabla de resultados -->
+    <div class="card shadow-sm p-3">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover" id="repoTable">
+                <thead class="table-dark">
+                <tr>
+                    <th>Nombre del Repositorio</th>
+                    <th>Descripción</th>
+                    <th>Estrellas / Seguidores</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td colspan="3" class="text-center text-muted">Introduce un usuario para ver sus repositorios.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- jQuery JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Lógica jQuery / API GitHub -->
+<script>
+    $(document).ready(function() {
+        $('#searchBtn').click(function() {
+            var username = $('#username').val().trim();
+
+            if (username === '') {
+                alert('Por favor, introduce un nombre de usuario.');
+                return;
+            }
+
+            var apiUrl = 'https://api.github.com/users/' + username + '/repos';
+
+            // Petición AJAX con jQuery
+            $.getJSON(apiUrl, function(repos) {
+                var tbody = $('#repoTable tbody');
+                tbody.empty(); // Limpiar la tabla anterior
+
+                if (repos.length === 0) {
+                    tbody.append('<tr><td colspan="3" class="text-center">El usuario no tiene repositorios públicos.</td></tr>');
+                    return;
+                }
+
+                // Recorrer el array de repositorios devueltos por la API
+                $.each(repos, function(index, repo) {
+                    var description = repo.description ? repo.description : 'Sin descripción';
+                    var row = '<tr>' +
+                        '<td><a href="' + repo.html_url + '" target="_blank">' + repo.name + '</a></td>' +
+                        '<td>' + description + '</td>' +
+                        '<td>' + repo.stargazers_count + ' ⭐</td>' +
+                        '</tr>';
+                    tbody.append(row);
+                });
+            }).fail(function() {
+                alert('No se pudo encontrar al usuario o se ha alcanzado el límite de peticiones de la API.');
+            });
+        });
+    });
+</script>
+</body>
+</html>
